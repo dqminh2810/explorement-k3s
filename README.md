@@ -1,6 +1,22 @@
 # explorement-k3s
 Learn K8s components architecture and how to management
 
+## INFRASTRUCTURE
+**VMware** `https://cloudviet.com.vn/download-vmware-workstation-pro-16-full-key-phan-mem-ao-hoa-quyen-nang-nhat/`
+
+**OS - DEBIAN** `https://deb.debian.org/debian/dists/bookworm/main/installer-amd64/current/images/netboot/mini.iso`
+- MASTER NODE
+
+`2 cores, 2GB RAM, 30GB DISK `
+
+- WORKER NODES
+
+`2 cores, 2GB RAM, 30GB DISK `
+
+- RANCHER
+
+`2 cores, 4GB RAM, 30GB DISK `
+
 ## MASTER NODE
 `./setup-master.sh`
 
