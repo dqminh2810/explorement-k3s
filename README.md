@@ -7,15 +7,21 @@ Learn K8s components architecture and how to management
 ## WORKER NODES
 **master node**
 - K3S_TOKEN
+
 `sudo cat /var/lib/rancher/k3s/server/node-token`
 
 - MASTER_IP
+
 `hostname -I`
 
 **worker node**
+
 `K3S_TOKEN=<K3S_TOKEN>`
+
 `MASTER_IP=<MASTER_IP>`
+
 `K3S_NODE_NAME=$(hostname)`
+
 `./setup-worker.sh $K3S_TOKEN $MASTER_IP $K3S_NODE_NAME`
 
 ## RANCHER
@@ -35,9 +41,12 @@ Learn K8s components architecture and how to management
 
 ## K8S MANIFEST FILES
 `kubectl apply -f manifest-deployment.yaml`
+
 `kubectl apply -f manifest-service-nodeport.yaml`
 
 ## CHECK CLUSTER STATUSES
 `kubectl get nodes -o wide`
+
 `kubectl get pods -o wide`
+
 `kubectl get services -o wide`
