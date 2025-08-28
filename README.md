@@ -17,8 +17,19 @@ Learn K8s components architecture and how to management
 
 `2 cores, 4GB RAM, 30GB DISK `
 
+**Disable GUI**
+
+`sudo systemctl set-default multi-user.target`
+
+`sudo reboot`
+
+## INSTALL DOCKER
+K3s includes and defaults to containerd, an industry-standard container runtime. As of Kubernetes 1.24, the Kubelet no longer includes dockershim, the component that allows the kubelet to communicate with dockerd. K3s 1.24 and higher include cri-dockerd, which allows seamless upgrade from prior releases of K3s while continuing to use the Docker container runtime.
+
+`./install-docker`
+
 ## MASTER NODE
-`./setup-master.sh`
+`./setup-master.sh` || `./setup-docker.sh --docker`
 
 ## WORKER NODES
 **master node**
@@ -55,8 +66,19 @@ Learn K8s components architecture and how to management
 - Import K3s Cluster to Rancher
 `Go to Rancher & Create new cluster & Go to master node then run CMD - curl --insecure -sfL <CONFIG_YAML_URL> | kubectl apply -f -`
 
+## SETUP CREDENTIAL FOR DOCKER REPOSITORY
+`
+k3s kubectl create secret docker-registry docker-reg-creds \
+      --docker-server=<your-registry-server> \
+      --docker-username=<your-username> \
+      --docker-password=<your-password> \
+      --docker-email=<your-email>
+`
+
 ## K8S MANIFEST FILES
-`kubectl apply -f manifest-deployment.yaml`
+`kubectl apply -f manifest-deployment-nginx.yaml`
+
+`kubectl apply -f manifest-deployment-alpine.yaml`
 
 `kubectl apply -f manifest-service-nodeport.yaml`
 
