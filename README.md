@@ -91,21 +91,25 @@ Client ---> LoadBalancer ---> (K8s cluster) IngressController ---> (K8s cluster)
 
 ### K8S INGRESS CONTROLLER
 *Install Nginx ingress controller having Node Port service*
+
 `kubectl -n ingress-nginx apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.7.1/deploy/static/provider/baremetal/deploy.yaml`
 
 *Create services*
+
 `kubectl -n ingress-nginx apply -f fruit.yaml`
 
 *Apply Ingress routing rules*
+
 `kubectl -n ingress-nginx apply -f ingress-fruit.yaml`
 
 *Test*
+
 `curl -H "Host: fruit.com" http://<worker-IP>:<ingress-controller-NPservice-port>/apple`
 
 `curl -H "Host: fruit.com" http://<worker-IP>:<ingress-controller-NPservice-port>/banana`
 
 ### LOAD BALANCER
-*Install haproxy on master*
+**Master node**
 
 `. ./loadbalancer/install-haproxy.sh`
 
@@ -115,12 +119,13 @@ Client ---> LoadBalancer ---> (K8s cluster) IngressController ---> (K8s cluster)
 
 `sudo service haproxy restart`
 
-*Browse <master-IP>:9000/haproxy?status  to check status*
+`Browse <master-IP>:9000/haproxy?status  to check status`
 
-*Modify hostname*
-`/etc/hosts -> add <master-IP> fruit.test.com`
+**Client Machine**
 
-*Browse <master-IP>:8080/apple*
+`C:\Windows\System32\drivers\etc\hosts || /etc/hosts  --->  <master-IP> fruit.test.com`
+
+`Browse fruit.test.com:8080/apple  fruit.test.com:8080/banana`
 
 ## CHECK CLUSTER STATUSES
 `kubectl <-n namespace_name> get nodes -o wide`
