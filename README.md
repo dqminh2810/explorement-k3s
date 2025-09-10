@@ -82,9 +82,49 @@ k3s kubectl create secret docker-registry docker-reg-creds \
 
 `kubectl apply -f manifest-service-nodeport.yaml`
 
+## LOAD BALANCER & K8S INGRESS
+
+Client ---> LoadBalancer ---> (K8s cluster) IngressController ---> (K8s cluster) Service B
+                                    |
+                                    |
+                         (K8s cluster) Service A
+
+### K8S INGRESS CONTROLLER
+*Install Nginx ingress controller having Node Port service*
+`kubectl -n ingress-nginx apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.7.1/deploy/static/provider/baremetal/deploy.yaml`
+
+*Create services*
+`kubectl -n ingress-nginx apply -f fruit.yaml`
+
+*Apply Ingress routing rules*
+`kubectl -n ingress-nginx apply -f ingress-fruit.yaml`
+
+*Test*
+`curl -H "Host: fruit.com" http://<worker-IP>:<ingress-controller-NPservice-port>/apple`
+
+`curl -H "Host: fruit.com" http://<worker-IP>:<ingress-controller-NPservice-port>/banana`
+
+### LOAD BALANCER
+*Install haproxy on master*
+
+`. ./loadbalancer/install-haproxy.sh`
+
+`cp loadbalancer/haproxy.cfg /etc/haproxy/haproxy.cfg` 
+
+`haproxy -c -f /etc/haproxy/haproxy.cfg`
+
+`sudo service haproxy restart`
+
+*Browse <master-IP>:9000/haproxy?status  to check status*
+
+*Modify hostname*
+`/etc/hosts -> add <master-IP> fruit.test.com`
+
+*Browse <master-IP>:8080/apple*
+
 ## CHECK CLUSTER STATUSES
-`kubectl get nodes -o wide`
+`kubectl <-n namespace_name> get nodes -o wide`
 
-`kubectl get pods -o wide`
+`kubectl <-n namespace_name> get pods -o wide`
 
-`kubectl get services -o wide`
+`kubectl <-n namespace_name> get services -o wide`
