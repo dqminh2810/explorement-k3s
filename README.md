@@ -2,20 +2,19 @@
 Learn K8s components architecture and how to management
 
 ## INFRASTRUCTURE
+### REQUIREMENTS
+- OS `Debian arm64`
+
+- MASTER NODE `2 cores, 4GB RAM, 30GB DISK `
+
+- WORKER NODES `2 cores, 2GB RAM, 30GB DISK `
+
+- RANCHER `2 cores, 4GB RAM, 30GB DISK `
+
+### LOCAL (VMware) - MANUALLY SETUP
 **VMware** `https://cloudviet.com.vn/download-vmware-workstation-pro-16-full-key-phan-mem-ao-hoa-quyen-nang-nhat/`
 
 **OS - DEBIAN** `https://deb.debian.org/debian/dists/bookworm/main/installer-amd64/current/images/netboot/mini.iso`
-- MASTER NODE
-
-`2 cores, 2GB RAM, 30GB DISK `
-
-- WORKER NODES
-
-`2 cores, 2GB RAM, 30GB DISK `
-
-- RANCHER
-
-`2 cores, 4GB RAM, 30GB DISK `
 
 **Disable GUI**
 
@@ -23,16 +22,16 @@ Learn K8s components architecture and how to management
 
 `sudo reboot`
 
-## INSTALL DOCKER
+**INSTALL DOCKER**
 K3s includes and defaults to containerd, an industry-standard container runtime. As of Kubernetes 1.24, the Kubelet no longer includes dockershim, the component that allows the kubelet to communicate with dockerd. K3s 1.24 and higher include cri-dockerd, which allows seamless upgrade from prior releases of K3s while continuing to use the Docker container runtime.
 
 `./install-docker`
 
-## MASTER NODE
+**MASTER NODE**
 `./setup-master.sh` || `./setup-docker.sh --docker`
 
-## WORKER NODES
-**master node**
+**WORKER NODES**
+***master node***
 - K3S_TOKEN
 
 `sudo cat /var/lib/rancher/k3s/server/node-token`
@@ -41,7 +40,7 @@ K3s includes and defaults to containerd, an industry-standard container runtime.
 
 `hostname -I`
 
-**worker node**
+***worker node***
 
 `K3S_TOKEN=<K3S_TOKEN>`
 
@@ -51,7 +50,7 @@ K3s includes and defaults to containerd, an industry-standard container runtime.
 
 `./setup-worker.sh $K3S_TOKEN $MASTER_IP $K3S_NODE_NAME`
 
-## RANCHER
+**RANCHER**
 `./setup-rancher.sh`
 
 - Get Password
@@ -65,6 +64,19 @@ K3s includes and defaults to containerd, an industry-standard container runtime.
 
 - Import K3s Cluster to Rancher
 `Go to Rancher & Create new cluster & Go to master node then run CMD - curl --insecure -sfL <CONFIG_YAML_URL> | kubectl apply -f -`
+
+### AWS (EC2) - SETUP K3S CLUSTER BY TERRAFORM
+`cd terraform`
+
+`ssh-keygen -t ed25519 -f ./ssh/k3s-cluster-key`
+
+`terraform init`
+
+`terraform plan`
+
+`terraform apply --without-approve`
+
+`terraform destroy --without-approve`
 
 ## SETUP CREDENTIAL FOR DOCKER REPOSITORY
 `
