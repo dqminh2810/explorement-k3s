@@ -1,6 +1,15 @@
 # explorement-k3s
 Learn K8s components architecture and how to management
 
+[INFRASTRUCTURE](#INFRASTRUCTURE)  
+[DOCKER REPOSITORY](#SETUP-CREDENTIAL-FOR-DOCKER-REPOSITORY)  
+[LOAD BALANCER & K8S INGRESS](#LOAD-BALANCER-&-K8S-INGRESS)  
+[ROLLING UPDATE](#ROLLING-UPDATE)  
+[HORIZONTAL POD AUTOSCALING](#HORIZONTAL-POD-AUTOSCALING)
+
+
+<a name="INFRASTRUCTURE"/>
+
 ## INFRASTRUCTURE
 ### REQUIREMENTS
 - OS `Debian arm64`
@@ -78,6 +87,8 @@ K3s includes and defaults to containerd, an industry-standard container runtime.
 
 `terraform destroy --without-approve`
 
+<a name="SETUP-CREDENTIAL-FOR-DOCKER-REPOSITORY"/>
+
 ## SETUP CREDENTIAL FOR DOCKER REPOSITORY
 `
 k3s kubectl create secret docker-registry docker-reg-creds \
@@ -86,6 +97,8 @@ k3s kubectl create secret docker-registry docker-reg-creds \
       --docker-password=<your-password> \
       --docker-email=<your-email>
 `
+
+<a name="LOAD-BALANCER-&-K8S-INGRESS"/>
 
 ## LOAD BALANCER & K8S INGRESS
 
@@ -126,6 +139,8 @@ Client ---> LoadBalancer (HAProxy) ---> (K8s cluster) IngressController ---> (K8
 
 `Browse myapp.example.com:8080`
 
+<a name="ROLLING-UPDATE"/>
+
 ## ROLLING UPDATE
 
 *Update the image*
@@ -135,6 +150,8 @@ Client ---> LoadBalancer (HAProxy) ---> (K8s cluster) IngressController ---> (K8
 *Monitor the rollout status*
 
 `kubectl -n <namespace_name> rollout status deployment/my-app`
+
+<a name="HORIZONTAL-POD-AUTOSCALING"/>
 
 ## HORIZONTAL POD AUTOSCALING
 
