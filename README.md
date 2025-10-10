@@ -87,38 +87,25 @@ k3s kubectl create secret docker-registry docker-reg-creds \
       --docker-email=<your-email>
 `
 
-## K8S MANIFEST FILES
-`kubectl apply -f manifest-deployment-nginx.yaml`
-
-`kubectl apply -f manifest-deployment-alpine.yaml`
-
-`kubectl apply -f manifest-service-nodeport.yaml`
-
 ## LOAD BALANCER & K8S INGRESS
 
-Client ---> LoadBalancer ---> (K8s cluster) IngressController ---> (K8s cluster) Service B
-                                    |
-                                    |
-                         (K8s cluster) Service A
-
+Client ---> LoadBalancer (HAProxy) ---> (K8s cluster) IngressController ---> (K8s cluster) Service B
+                                                            |
+                                                            |
+                                                (K8s cluster) Service A
+                                                
 ### K8S INGRESS CONTROLLER
 *Install Nginx ingress controller having Node Port service*
 
 `kubectl -n ingress-nginx apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.7.1/deploy/static/provider/baremetal/deploy.yaml`
 
-*Create services*
+*Create deployment + apply ingress rules*
 
-`kubectl -n ingress-nginx apply -f fruit.yaml`
-
-*Apply Ingress routing rules*
-
-`kubectl -n ingress-nginx apply -f ingress-fruit.yaml`
+`kubectl apply -f test.yaml`
 
 *Test*
 
-`curl -H "Host: fruit.com" http://<worker-IP>:<ingress-controller-NPservice-port>/apple`
-
-`curl -H "Host: fruit.com" http://<worker-IP>:<ingress-controller-NPservice-port>/banana`
+`curl -H "Host: myapp.example.com" http://<worker-IP>:<ingress-controller-NPservice-port>/`
 
 ### LOAD BALANCER
 **Master node**
@@ -131,17 +118,34 @@ Client ---> LoadBalancer ---> (K8s cluster) IngressController ---> (K8s cluster)
 
 `sudo service haproxy restart`
 
-`Browse <master-IP>:9000/haproxy?status  to check status`
+`Browse <master-IP>:9000/haproxy?stats  to check status`
 
 **Client Machine**
 
-`C:\Windows\System32\drivers\etc\hosts || /etc/hosts  --->  <master-IP> fruit.test.com`
+`C:\Windows\System32\drivers\etc\hosts || /etc/hosts  --->  <master-IP> myapp.example.com`
 
-`Browse fruit.test.com:8080/apple  fruit.test.com:8080/banana`
+`Browse myapp.example.com:8080`
 
-## CHECK CLUSTER STATUSES
-`kubectl <-n namespace_name> get nodes -o wide`
+## ROLLING UPDATE
 
-`kubectl <-n namespace_name> get pods -o wide`
+*Update the image*
 
-`kubectl <-n namespace_name> get services -o wide`
+`kubectl -n <namespace_name> set image deployment/my-app my-app=nginx:1.26-alpine`
+
+*Monitor the rollout status*
+
+`kubectl -n <namespace_name> rollout status deployment/my-app`
+
+## HORIZONTAL POD AUTOSCALING
+
+*Simulate high CPU load with new terminals*
+
+`while true; do wget -q -O- http://myapp.example.com; done`
+
+*Watch HPA stastus*
+
+`kubectl -n <namespace_name> get hpa -w`
+
+*Watch Pod stastus*
+
+`kubectl -n <namespace_name> get pod -w`

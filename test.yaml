@@ -1,0 +1,182 @@
+# =============================
+# 0) Namespace
+# =============================
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-nginx-full-cycle-ns
+
+---
+# =============================
+# 1) Deployment
+# =============================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+  namespace: test-nginx-full-cycle-ns
+spec:
+  replicas: 4
+  revisionHistoryLimit: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+        - name: my-app
+          image: nginx:1.25-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "512Mi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 2
+            failureThreshold: 3
+      terminationGracePeriodSeconds: 30
+
+---
+# =============================
+# 2) Horizontal Pod Autoscaler
+#    Scales between 4 and 15 pods at ~50% CPU
+# =============================
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: my-app-hpa
+  namespace: test-nginx-full-cycle-ns
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: my-app
+  minReplicas: 4
+  maxReplicas: 15
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
+
+---
+# =============================
+# 3) Service (ClusterIP)
+# =============================
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-app
+  namespace: test-nginx-full-cycle-ns
+spec:
+  selector:
+    app: my-app
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+  type: ClusterIP
+
+---
+# =============================
+# 4) Ingress (TLS)
+#    Annotations assume nginx ingress + cert-manager.
+#    Replace host with your domain.
+# =============================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-app-ingress
+  namespace: test-nginx-full-cycle-ns
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    # cert-manager.io/cluster-issuer: letsencrypt-test-nginx-full-cycle
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/rewrite-target: "/"
+spec:
+  # tls:
+  #   - hosts:
+  #       - myapp.example.com
+  #     secretName: myapp-tls
+  ingressClassName: nginx
+  rules:
+    - host: myapp.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: my-app
+                port:
+                  number: 80
+
+# ---
+# # =============================
+# # 5) (Optional) cert-manager ClusterIssuer
+# #    Use HTTP-01 via your Ingress controller.
+# #    Configure your email and (if needed) solver class/ingress.
+# # =============================
+# apiVersion: cert-manager.io/v1
+# kind: ClusterIssuer
+# metadata:
+#   name: letsencrypt-test-nginx-full-cycle
+# spec:
+#   acme:
+#     # TODO: set a real email for renewal notices
+#     email: you@example.com
+#     server: https://acme-v02.api.letsencrypt.org/directory
+#     privateKeySecretRef:
+#       name: letsencrypt-test-nginx-full-cycle-account-key
+#     solvers:
+#       - http01:
+#           ingress:
+#             class: nginx
+
+# ---
+# # =============================
+# # 6) (Optional) cert-manager Certificate
+# #    This will create/update the TLS Secret named myapp-tls.
+# # =============================
+# apiVersion: cert-manager.io/v1
+# kind: Certificate
+# metadata:
+#   name: myapp-cert
+#   namespace: test-nginx-full-cycle-ns
+# spec:
+#   secretName: myapp-tls
+#   commonName: myapp.example.com
+#   dnsNames:
+#     - myapp.example.com
+#   issuerRef:
+#     kind: ClusterIssuer
+#     name: letsencrypt-test-nginx-full-cycle
