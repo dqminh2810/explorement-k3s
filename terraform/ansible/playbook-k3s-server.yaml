@@ -1,0 +1,8 @@
+- name: Run base setup on k3s server
+  hosts: all
+  become: true
+  vars:
+    ansible_host_key_checking: False
+  tasks:
+    - name: Execute base setup script
+      ansible.builtin.script: ../base-setup/install-k3s-server.sh

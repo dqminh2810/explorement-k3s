@@ -1,0 +1,7 @@
+**/ssh/**
+
+**/tmp/k3s_node_token
+**/.terraform/
+**/terraform.tfstate
+**/**.tfstate.**
+**/.terraform.lock.hcl
