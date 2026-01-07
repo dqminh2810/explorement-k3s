@@ -166,3 +166,11 @@ Client ---> LoadBalancer (HAProxy) ---> (K8s cluster) IngressController ---> (K8
 *Watch Pod stastus*
 
 `kubectl -n <namespace_name> get pod -w`
+ 
+## ARCHITECTURE
+
+![Infra_architecture](https://github.com/dqminh2810/explorement-k3s/blob/main/docs/k3s-rancher-architecture.png)
+
+![Components_architecture-1](https://github.com/dqminh2810/explorement-k3s/blob/main/docs/k3s-architecture-1.png)
+
+![Components_architecture-2](https://github.com/dqminh2810/explorement-k3s/blob/main/docs/k3s-architecture-2.png)
